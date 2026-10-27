@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Shop products online with easy checkout and order tracking.">
+  <title>Everyday Market | Online Store</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="announcement">Welcome to Everyday Market · Delivery options available</div>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Everyday Market home"><span class="brand-mark">E</span><span>Everyday <b>Market</b></span></a>
+    <div class="header-actions">
+      <button class="btn btn-light" id="account-open">Account</button>
+      <button class="btn btn-dark" id="cart-open">Cart <span class="count" id="cart-count">0</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">YOUR EVERYDAY FINDS</p>
+        <h1>Good things.<br><span>One simple shop.</span></h1>
+        <p>Discover useful, beautiful, and affordable finds for everyday life.</p>
+        <a class="btn btn-dark hero-button" href="#shop">Explore products <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="hero-art" aria-label="A selection of shopping items" role="img">
+        <div class="art-circle"></div>
+        <div class="art-card art-card-one"><span>HOME</span><b>Little comforts</b><div class="art-emoji">🪴</div></div>
+        <div class="art-card art-card-two"><span>STYLE</span><b>Everyday essentials</b><div class="art-emoji">👜</div></div>
+        <div class="art-card art-card-three"><span>TECH</span><b>Smart choices</b><div class="art-emoji">🎧</div></div>
+      </div>
+    </section>
+
+    <section class="shop-section" id="shop">
+      <div class="section-heading">
+        <div><p class="eyebrow">THE COLLECTION</p><h2>Find your next favourite</h2></div>
+        <input id="search-input" class="search-input" type="search" placeholder="Search products..." aria-label="Search products">
+      </div>
+      <div class="category-row" id="category-row">
+        <button class="category-chip active" data-category="All">All products</button>
+        <button class="category-chip" data-category="Fashion">Fashion</button>
+        <button class="category-chip" data-category="Home">Home</button>
+        <button class="category-chip" data-category="Electronics">Electronics</button>
+        <button class="category-chip" data-category="Beauty">Beauty</button>
+        <button class="category-chip" data-category="Other">Other</button>
+      </div>
+      <div id="product-grid" class="product-grid">
+        <p class="muted">Loading products…</p>
+      </div>
+    </section>
+
+    <section class="tracking-section">
+      <div><p class="eyebrow">AFTER YOU ORDER</p><h2>Your order, at a glance.</h2><p>Sign in to view your order history and the latest status updates.</p></div>
+      <button class="btn btn-dark" id="track-open">View my orders</button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="brand footer-brand" href="#"><span class="brand-mark">E</span><span>Everyday <b>Market</b></span></a>
+    <p>Thoughtful finds for everyday life.</p>
+    <small>© <span id="year"></span> Everyday Market. All rights reserved.</small>
+  </footer>
+
+  <div class="overlay hidden" id="overlay"></div>
+
+  <aside class="drawer hidden" id="cart-drawer" aria-label="Shopping cart">
+    <div class="drawer-heading"><div><p class="eyebrow">YOUR SELECTION</p><h2>Your cart</h2></div><button class="icon-button" data-close aria-label="Close cart">✕</button></div>
+    <div id="cart-items" class="cart-items"></div>
+    <div class="cart-summary">
+      <div class="total-line"><span>Subtotal</span><strong id="cart-subtotal">KSh 0</strong></div>
+      <p class="muted tiny">Delivery fees, if any, are confirmed with the shop.</p>
+      <button class="btn btn-dark full-width" id="checkout-open">Continue to checkout</button>
+    </div>
+  </aside>
+
+  <section class="modal hidden" id="account-modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <button class="icon-button modal-close" data-close aria-label="Close">✕</button>
+    <p class="eyebrow">WELCOME</p><h2 id="account-title">Your account</h2>
+    <p class="muted">Create an account or sign in to see your orders.</p>
+    <form id="auth-form" class="form-stack">
+      <label>Email address<input id="auth-email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+      <label>Password<input id="auth-password" type="password" minlength="6" autocomplete="current-password" required placeholder="At least 6 characters"></label>
+      <div class="two-buttons"><button class="btn btn-dark" type="submit" id="signin-button">Sign in</button><button class="btn btn-outline" type="button" id="signup-button">Create account</button></div>
+    </form>
+    <div id="account-message" class="notice" aria-live="polite"></div>
+    <div id="signed-in-panel" class="hidden">
+      <p id="signed-in-email"></p><button class="btn btn-outline full-width" id="signout-button">Sign out</button>
+    </div>
+  </section>
+
+  <section class="modal modal-wide hidden" id="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+    <button class="icon-button modal-close" data-close aria-label="Close">✕</button>
+    <p class="eyebrow">ALMOST YOURS</p><h2 id="checkout-title">Checkout</h2>
+    <p class="muted">Sign in first so your order can be saved to your account.</p>
+    <form id="checkout-form" class="form-stack">
+      <div class="form-grid">
+        <label>Full name<input id="customer-name" required autocomplete="name" placeholder="Your full name"></label>
+        <label>Phone number<input id="customer-phone" required autocomplete="tel" placeholder="07xx xxx xxx"></label>
+      </div>
+      <label>Delivery address / area<textarea id="customer-address" required rows="2" placeholder="Estate, town, and delivery details"></textarea></label>
+      <label>Payment method
+        <select id="payment-method" required>
+          <option value="M-Pesa (manual confirmation)">M-Pesa (manual confirmation)</option>
+          <option value="Cash on delivery">Cash on delivery</option>
+          <option value="Pay via WhatsApp">Arrange payment via WhatsApp</option>
+          <option value="Card (arranged with shop)">Card (arranged with shop; no card details collected here)</option>
+        </select>
+      </label>
+      <label>Order note (optional)<textarea id="order-note" rows="2" placeholder="Colour, size, or other request"></textarea></label>
+      <div class="checkout-total"><span>Order total</span><strong id="checkout-total">KSh 0</strong></div>
+      <button class="btn btn-dark full-width" id="place-order-button" type="submit">Place order</button>
+      <p class="tiny muted">This demo does not process payments automatically. The shop must confirm payment separately.</p>
+    </form>
+    <div id="checkout-message" class="notice" aria-live="polite"></div>
+  </section>
+
+  <section class="modal modal-wide hidden" id="orders-modal" role="dialog" aria-modal="true" aria-labelledby="orders-title">
+    <button class="icon-button modal-close" data-close aria-label="Close">✕</button>
+    <p class="eyebrow">ORDER HISTORY</p><h2 id="orders-title">Track your orders</h2>
+    <div id="orders-content"><p class="muted">Sign in to see your orders.</p></div>
+  </section>
+
+  <section class="modal modal-wide hidden" id="admin-modal" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+    <button class="icon-button modal-close" data-close aria-label="Close">✕</button>
+    <p class="eyebrow">STORE MANAGEMENT</p><h2 id="admin-title">Admin dashboard</h2>
+    <p class="muted">Only accounts marked as admin in your Supabase database can access admin actions.</p>
+    <div id="admin-content"><p class="muted">Checking permissions…</p></div>
+  </section>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+  <button id="admin-shortcut" class="admin-shortcut hidden" title="Open admin dashboard">Admin</button>
+</body>
+</html>
